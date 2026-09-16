@@ -1,0 +1,32 @@
+# virtualenvs and build artifacts
+.venv/
+venv/
+build/
+dist/
+*.egg-info/
+
+# python caches
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# coverage
+.coverage
+.coverage.*
+htmlcov/
+
+# logs
+*.log
+
+# OS noise
+.DS_Store
+
+# editor
+.idea/
+.vscode/
+
+# triage output is per-run evidence, not source
+reports/triage-*.md
+reports/triage-summary.md

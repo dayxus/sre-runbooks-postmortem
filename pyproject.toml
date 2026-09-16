@@ -1,0 +1,56 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sretriage"
+version = "0.1.0"
+description = "Evidence-based triage CLI for the machine-validated runbook library."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "Jeferson Melo" }]
+keywords = ["sre", "runbooks", "triage", "incident-management", "on-call"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.9",
+  "Topic :: System :: Systems Administration",
+]
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=7.4", "ruff>=0.6"]
+
+[project.scripts]
+sretriage = "sretriage.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/dayxus/sre-runbooks-postmortem"
+
+[tool.setuptools]
+package-dir = { "" = "tools" }
+packages = ["sretriage", "sretriage.checks"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+filterwarnings = ["error::DeprecationWarning"]
+
+[tool.ruff]
+target-version = "py39"
+line-length = 110
+
+[tool.ruff.lint]
+# pyupgrade (UP) is deliberately off: the package must keep running on Python 3.9
+# as shipped by macOS, and the %-formatting style is used consistently across
+# the checks for readable evidence strings.
+select = ["E", "F", "W", "I", "B", "SIM", "C4", "RUF"]
+ignore = [
+  "E501",   # line length is handled by the formatter
+  "RUF001", # the runbooks, checks and messages are in Portuguese; accents are intentional
+  "RUF002",
+  "RUF003",
+]
+
+[tool.ruff.format]
+quote-style = "double"

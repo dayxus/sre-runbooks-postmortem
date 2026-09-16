@@ -1,0 +1,147 @@
+name: maintenance
+
+on:
+  schedule:
+    # Mondays at 06:23 UTC - links, staleness, runbook lint and upstream versions.
+    - cron: "23 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+
+env:
+  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  weekly-audit:
+    name: weekly link, staleness and version audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install the package
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e .
+
+      - name: Audit external links in runbooks, templates and docs
+        id: link_audit
+        continue-on-error: true
+        run: python tools/audit_links.py links | tee /tmp/link-audit.txt
+
+      - name: Lint the runbooks and check the generated index
+        id: runbook_lint
+        continue-on-error: true
+        run: |
+          {
+            python -m sretriage check-runbooks
+            python -m sretriage index --check
+          } 2>&1 | tee /tmp/runbook-lint.txt
+
+      - name: List runbooks overdue for review
+        id: staleness
+        continue-on-error: true
+        run: python tools/audit_links.py stale --max-age-days 180 | tee /tmp/stale.txt
+
+      - name: Refresh upstream versions of Kubernetes and AWS CLI v2
+        id: versions
+        continue-on-error: true
+        run: python tools/update_versions.py | tee /tmp/versions.txt
+
+      - name: Open an issue when external links are dead
+        if: steps.link_audit.outcome == 'failure'
+        run: |
+          TITLE="Dead links found in the runbook library"
+          count=$(gh issue list --state open --search "in:title \"$TITLE\"" --json number --jq 'length')
+          if [ "$count" -ne 0 ]; then
+            echo "an open issue already tracks this"; exit 0
+          fi
+          {
+            echo "The weekly link audit found unreachable URLs."
+            echo
+            echo "Full report: \`reports/link-audit.md\` (committed by this run)."
+            echo
+            echo '```text'
+            sed -n '1,60p' /tmp/link-audit.txt
+            echo '```'
+            echo
+            echo "Run: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          } > /tmp/issue-links.md
+          gh issue create --title "$TITLE" --body-file /tmp/issue-links.md
+
+      - name: Open an issue when the runbook lint fails
+        if: steps.runbook_lint.outcome == 'failure'
+        run: |
+          TITLE="Runbook lint failed on schedule"
+          count=$(gh issue list --state open --search "in:title \"$TITLE\"" --json number --jq 'length')
+          if [ "$count" -ne 0 ]; then
+            echo "an open issue already tracks this"; exit 0
+          fi
+          {
+            echo "The scheduled validation of front matter, sections, commands and internal links failed."
+            echo
+            echo '```text'
+            sed -n '1,80p' /tmp/runbook-lint.txt
+            echo '```'
+            echo
+            echo "Run: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          } > /tmp/issue-lint.md
+          gh issue create --title "$TITLE" --body-file /tmp/issue-lint.md
+
+      - name: Open an issue when runbooks are overdue for review
+        if: steps.staleness.outcome == 'failure'
+        run: |
+          TITLE="Runbooks pendentes de revisao"
+          count=$(gh issue list --state open --search "in:title \"$TITLE\"" --json number --jq 'length')
+          if [ "$count" -ne 0 ]; then
+            echo "an open issue already tracks this"; exit 0
+          fi
+          {
+            echo "Estes runbooks passaram da janela de revisao de 180 dias."
+            echo
+            echo "Relatorio completo: \`reports/stale-runbooks.md\`."
+            echo
+            echo '```text'
+            sed -n '1,60p' /tmp/stale.txt
+            echo '```'
+            echo
+            echo "Run: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          } > /tmp/issue-stale.md
+          gh issue create --title "$TITLE" --body-file /tmp/issue-stale.md
+
+      - name: Commit regenerated reports only when something changed
+        run: |
+          git config user.name "Jeferson Melo"
+          git config user.email "161839842+dayxus@users.noreply.github.com"
+          git add reports/link-audit.md reports/stale-runbooks.md docs/versions.md
+          if git diff --cached --quiet; then
+            echo "no real change this week, nothing to commit"
+            exit 0
+          fi
+          git commit -m "chore: refresh weekly link, staleness and version audits"
+          git push
+
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "## weekly maintenance"
+            echo
+            echo "| step | outcome |"
+            echo "| --- | --- |"
+            echo "| link audit | ${{ steps.link_audit.outcome }} |"
+            echo "| runbook lint | ${{ steps.runbook_lint.outcome }} |"
+            echo "| staleness | ${{ steps.staleness.outcome }} |"
+            echo "| upstream versions | ${{ steps.versions.outcome }} |"
+            echo
+            echo '```text'
+            cat /tmp/versions.txt 2>/dev/null || echo "no version output"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"

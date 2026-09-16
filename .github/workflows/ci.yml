@@ -1,0 +1,131 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lint-test:
+    name: lint + test (py${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install the package and dev tools
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[dev]"
+
+      - name: ruff check
+        run: ruff check .
+
+      - name: ruff format --check
+        run: ruff format --check .
+
+      - name: pytest
+        run: pytest -q
+
+  docs:
+    name: runbook docs and structure
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install the package
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e .
+
+      - name: Validate runbooks (front matter, sections, commands, links)
+        run: python -m sretriage check-runbooks
+
+      - name: The generated index must be current
+        run: python -m sretriage index --check
+
+      - name: Relative links between runbooks, docs and templates
+        run: pytest -q tests/test_internal_links.py
+
+      - name: Lint the markdown of runbooks and templates
+        run: |
+          npx --yes markdownlint-cli2@0.17.2 \
+            "runbooks/**/*.md" "templates/**/*.md" "docs/**/*.md" \
+            "README.md" "README.pt-BR.md"
+
+  triage-demo:
+    name: triage demo against a local probe
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install the package
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e .
+
+      - name: Start the local probe server
+        run: |
+          python tools/demo_server.py --host 127.0.0.1 --port 8099 &
+          for _ in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:8099/healthz >/dev/null 2>&1; then
+              echo "probe is answering"
+              exit 0
+            fi
+            sleep 0.5
+          done
+          echo "probe never became ready" >&2
+          exit 1
+
+      - name: Run sretriage against the probe and a public target
+        run: |
+          set -o pipefail
+          python -m sretriage run \
+            --target http://127.0.0.1:8099/healthz \
+            --target https://example.org \
+            --target-host 1.1.1.1 \
+            --out reports/ | tee reports/triage-summary.md
+          echo "sretriage exit code: $?"
+
+      - name: Upload the triage reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sretriage-reports
+          path: reports/
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Summarize the verdict
+        if: always()
+        run: |
+          {
+            echo "## sretriage demo"
+            echo
+            sed -n '1,20p' reports/triage-summary.md 2>/dev/null || echo "no summary produced"
+          } >> "$GITHUB_STEP_SUMMARY"
