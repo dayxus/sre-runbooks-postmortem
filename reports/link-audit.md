@@ -1,8 +1,8 @@
 # Auditoria de links externos
 
-- Executado em: 2026-09-15 21:41:59 (UTC)
-- Arquivos varridos: 24
-- URLs únicas verificadas: 51
+- Executado em: 2026-09-16 00:52:42 (UTC)
+- Arquivos varridos: 26
+- URLs únicas verificadas: 55
 - URLs mortas: 0
 - User-Agent: `sretriage-link-audit/0.1 (+https://github.com/dayxus/sre-runbooks-postmortem)`
 
@@ -18,6 +18,10 @@
 | https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html | 200 | HEAD | runbooks/cloud/s3-throttling.md |
 | https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax | 200 | HEAD | runbooks/cicd/pipeline-flaky.md |
 | https://docs.openssl.org/3.0/man1/openssl-s_client/ | 200 | HEAD | runbooks/network/tls-cert-expiry.md |
+| https://github.com/dayxus | 200 | HEAD | README.md, README.pt-BR.md |
+| https://github.com/dayxus/sre-runbooks-postmortem/actions/workflows/ci.yml/badge.svg | 200 | HEAD | README.md, README.pt-BR.md |
+| https://img.shields.io/badge/license-MIT-blue.svg | 200 | HEAD | README.md, README.pt-BR.md |
+| https://img.shields.io/badge/python-3.9%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue.svg | 200 | HEAD | README.md, README.pt-BR.md |
 | https://kubernetes.io/docs/concepts/architecture/nodes/ | 200 | HEAD | runbooks/cloud/eks-node-degraded.md, runbooks/kubernetes/node-notready.md, runbooks/kubernetes/pending-pods.md |
 | https://kubernetes.io/docs/concepts/cluster-administration/cluster-autoscaling/ | 200 | HEAD | runbooks/cloud/eks-node-degraded.md |
 | https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/ | 200 | HEAD | runbooks/kubernetes/crashloopbackoff.md, runbooks/kubernetes/oomkilled.md |
@@ -65,6 +69,10 @@ Nenhum link morto encontrado.
 ## URLs repetidas em vários arquivos
 
 - `https://docs.aws.amazon.com/cli/latest/reference/rds/` (2 arquivos)
+- `https://github.com/dayxus` (2 arquivos)
+- `https://github.com/dayxus/sre-runbooks-postmortem/actions/workflows/ci.yml/badge.svg` (2 arquivos)
+- `https://img.shields.io/badge/license-MIT-blue.svg` (2 arquivos)
+- `https://img.shields.io/badge/python-3.9%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue.svg` (2 arquivos)
 - `https://kubernetes.io/docs/concepts/architecture/nodes/` (3 arquivos)
 - `https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/` (2 arquivos)
 - `https://kubernetes.io/docs/concepts/scheduling-eviction/node-pressure-eviction/` (2 arquivos)
