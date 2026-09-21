@@ -1,6 +1,6 @@
 # Auditoria de links externos
 
-- Executado em: 2026-09-21 12:03:32 (UTC)
+- Executado em: 2026-09-21 12:57:07 (UTC)
 - Arquivos varridos: 26
 - URLs únicas verificadas: 55
 - URLs mortas: 0
