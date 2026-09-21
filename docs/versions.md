@@ -8,9 +8,9 @@ diferença real.
 <!-- BEGIN GENERATED VERSIONS -->
 | Componente | Versão estável | Verificado em (UTC) | Fonte |
 | --- | --- | --- | --- |
-| Kubernetes | `1.37.0` | 2026-09-16 | https://dl.k8s.io/release/stable.txt |
-| kubectl | `1.37.0` | 2026-09-16 | https://dl.k8s.io/release/stable.txt |
-| AWS CLI v2 | `2.36.46` | 2026-09-16 | https://github.com/aws/aws-cli/releases |
+| Kubernetes | `1.37.0` | 2026-09-21 | https://dl.k8s.io/release/stable.txt |
+| kubectl | `1.37.0` | 2026-09-21 | https://dl.k8s.io/release/stable.txt |
+| AWS CLI v2 | `2.36.49` | 2026-09-21 | https://github.com/aws/aws-cli/releases |
 <!-- END GENERATED VERSIONS -->
 
 ## Por que isso existe
