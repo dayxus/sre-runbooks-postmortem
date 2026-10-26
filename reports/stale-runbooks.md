@@ -1,6 +1,6 @@
 # Runbooks pendentes de revisão
 
-- Executado em: 2026-10-19 13:30:26 (UTC)
+- Executado em: 2026-10-26 13:14:06 (UTC)
 - Janela de revisão: 180 dias
 - Runbooks dentro da janela: 16
 - Runbooks vencidos: 0
