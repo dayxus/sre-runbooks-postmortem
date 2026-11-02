@@ -1,6 +1,6 @@
 # Auditoria de links externos
 
-- Executado em: 2026-10-26 13:14:06 (UTC)
+- Executado em: 2026-11-02 16:09:58 (UTC)
 - Arquivos varridos: 26
 - URLs únicas verificadas: 55
 - URLs mortas: 0
@@ -57,7 +57,7 @@
 | https://www.iana.org/domains/root/servers | 200 | HEAD | runbooks/network/dns-failure.md |
 | https://www.postgresql.org/docs/current/libpq-connect.html | 200 | HEAD | runbooks/database/connection-pool-saturation.md |
 | https://www.postgresql.org/docs/current/monitoring-stats.html | 200 | HEAD | runbooks/cloud/rds-connection-exhaustion.md, runbooks/database/replication-lag.md |
-| https://www.postgresql.org/docs/current/runtime-config-connection.html | 200 | HEAD | runbooks/cloud/rds-connection-exhaustion.md, runbooks/database/connection-pool-saturation.md |
+| https://www.postgresql.org/docs/current/runtime-config-connection.html | 200 | GET | runbooks/cloud/rds-connection-exhaustion.md, runbooks/database/connection-pool-saturation.md |
 | https://www.postgresql.org/docs/current/runtime-config-resource.html | 200 | HEAD | runbooks/database/connection-pool-saturation.md |
 | https://www.postgresql.org/docs/current/warm-standby.html | 200 | HEAD | runbooks/database/replication-lag.md |
 | https://www.rfc-editor.org/rfc/rfc1035 | 200 | HEAD | runbooks/network/dns-failure.md |
